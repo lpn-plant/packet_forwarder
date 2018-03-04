@@ -16,8 +16,10 @@ Maintainer: Michael Coracin
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
+#ifndef NOQSORT_R
 #define _GNU_SOURCE     /* needed for qsort_r to be defined */
-#include <stdlib.h>     /* qsort_r */
+#endif
+#include <stdlib.h>     /* qsort, qsort_r */
 #include <stdio.h>      /* printf, fprintf, snprintf, fopen, fputs */
 #include <string.h>     /* memset, memcpy */
 #include <pthread.h>
@@ -91,6 +93,19 @@ void jit_queue_init(struct jit_queue_s *queue) {
     pthread_mutex_unlock(&mx_jit_queue);
 }
 
+#ifdef NOQSORT_R
+int compare(const void *a, const void *b)
+{
+    struct jit_node_s *p = (struct jit_node_s *)a;
+    struct jit_node_s *q = (struct jit_node_s *)b;
+    int p_count, q_count;
+
+    p_count = p->pkt.count_us;
+    q_count = q->pkt.count_us;
+
+    return p_count - q_count;
+}
+#else
 int compare(const void *a, const void *b, void *arg)
 {
     struct jit_node_s *p = (struct jit_node_s *)a;
@@ -106,17 +121,25 @@ int compare(const void *a, const void *b, void *arg)
 
     return p_count - q_count;
 }
+#endif
 
 void jit_sort_queue(struct jit_queue_s *queue) {
+#ifndef NOQSORT_R
     int counter = 0;
+#endif
 
     if (queue->num_pkt == 0) {
         return;
     }
 
     MSG_DEBUG(DEBUG_JIT, "sorting queue in ascending order packet timestamp - queue size:%u\n", queue->num_pkt);
+#ifdef NOQSORT_R
+    qsort(queue->nodes, queue->num_pkt, sizeof(queue->nodes[0]), compare);
+    MSG_DEBUG(DEBUG_JIT, "sorting queue done\n");
+#else
     qsort_r(queue->nodes, queue->num_pkt, sizeof(queue->nodes[0]), compare, &counter);
     MSG_DEBUG(DEBUG_JIT, "sorting queue done - swapped:%d\n", counter);
+#endif
 }
 
 bool jit_collision_test(uint32_t p1_count_us, uint32_t p1_pre_delay, uint32_t p1_post_delay, uint32_t p2_count_us, uint32_t p2_pre_delay, uint32_t p2_post_delay) {
