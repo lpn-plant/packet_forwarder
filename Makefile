@@ -1,6 +1,7 @@
-### Environment constants 
+### Environment constants
 
 LGW_PATH ?= ../../lora_gateway/libloragw
+GLOBAL_CONF_PATH ?= global_conf.json
 ARCH ?=
 CROSS_COMPILE ?=
 export

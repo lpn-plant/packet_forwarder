@@ -2,7 +2,7 @@
 
 APP_NAME := lora_pkt_fwd
 
-### Environment constants 
+### Environment constants
 
 ARCH ?=
 CROSS_COMPILE ?=
@@ -20,8 +20,8 @@ RELEASE_VERSION := `cat ../VERSION`
 CC := $(CROSS_COMPILE)gcc
 AR := $(CROSS_COMPILE)ar
 
-CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.
-VFLAG := -D VERSION_STRING="\"$(RELEASE_VERSION)\""
+CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I$(LGW_PATH)/inc
+VFLAG := -D VERSION_STRING="\"$(RELEASE_VERSION)\"" -D GLOBAL_CONF_PATH="\"$(GLOBAL_CONF_PATH)\""
 
 ### Linking options
 
@@ -41,7 +41,7 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
 ### Main program compilation and assembly
 

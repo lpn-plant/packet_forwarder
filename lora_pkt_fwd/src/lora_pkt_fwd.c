@@ -71,6 +71,10 @@ Maintainer: Michael Coracin
   #define VERSION_STRING "undefined"
 #endif
 
+#ifndef GLOBAL_CONF_PATH
+  #define GLOBAL_CONF_PATH "global_conf.json"
+#endif
+
 #define DEFAULT_SERVER      127.0.0.1   /* hostname also supported */
 #define DEFAULT_PORT_UP     1780
 #define DEFAULT_PORT_DW     1782
@@ -973,15 +977,18 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
-int main(void)
+int main(int argc, char *argv[])
 {
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
     int i; /* loop variable and temporary variable for return value */
     int x;
 
     /* configuration file related */
-    char *global_cfg_path= "global_conf.json"; /* contain global (typ. network-wide) configuration */
+    char *global_cfg_path= GLOBAL_CONF_PATH; /* contain global (typ. network-wide) configuration */
     char *local_cfg_path = "local_conf.json"; /* contain node specific configuration, overwrite global parameters for parameters that are defined in both */
+    if (argc > 1) {
+        local_cfg_path = argv[1];
+    }
     char *debug_cfg_path = "debug_conf.json"; /* if present, all other configuration files are ignored */
 
     /* threads */
